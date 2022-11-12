@@ -5,82 +5,79 @@ Description: >
 
   Sample SAM Template for stori-flow
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Tracing: Active
+    Timeout: 300
   Api:
     TracingEnabled: True
 
 Resources:
-  StockTradingStateMachine:
-    Type: AWS::Serverless::StateMachine # More info about State Machine Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-statemachine.html
+  StoriFlowStateMachine:
+    Type: AWS::Serverless::StateMachine
     Properties:
-      DefinitionUri: statemachine/stock_trader.asl.json
+      DefinitionUri: statemachine/stori_flow.asl.json
       DefinitionSubstitutions:
-        StockCheckerFunctionArn: !GetAtt StockCheckerFunction.Arn
-        StockSellerFunctionArn: !GetAtt StockSellerFunction.Arn
-        StockBuyerFunctionArn: !GetAtt StockBuyerFunction.Arn
-        DDBPutItem: !Sub arn:${AWS::Partition}:states:::dynamodb:putItem
-        DDBTable: !Ref TransactionTable
+        ProcessFileFunctionArn: !GetAtt ProcessFileFunction.Arn
+        GetDataFunctionArn: !GetAtt GetDataFunction.Arn
+        SendEmailFunctionArn: !GetAtt SendEmailFunction.Arn
+        # DDBPutItem: !Sub arn:${AWS::Partition}:states:::dynamodb:putItem
+        # DDBTable: !Ref TransactionTable
       Events:
         HourlyTradingSchedule:
-          Type: Schedule # More info about Schedule Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-statemachine-schedule.html
+          Type: Schedule
           Properties:
             Description: Schedule to run the stock trading state machine every hour
-            Enabled: False # This schedule is disabled by default to avoid incurring charges.
+            Enabled: False
             Schedule: "rate(1 hour)"
-      Policies: # Find out more about SAM policy templates: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
+      Policies:
         - LambdaInvokePolicy:
-            FunctionName: !Ref StockCheckerFunction
+            FunctionName: !Ref ProcessFileFunction
         - LambdaInvokePolicy:
-            FunctionName: !Ref StockSellerFunction
+            FunctionName: !Ref GetDataFunction
         - LambdaInvokePolicy:
-            FunctionName: !Ref StockBuyerFunction
-        - DynamoDBWritePolicy:
-            TableName: !Ref TransactionTable
+            FunctionName: !Ref SendEmailFunction
+        # - DynamoDBWritePolicy:
+            # TableName: !Ref TransactionTable
 
-  StockCheckerFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
-    Properties:
-      CodeUri: functions/stock_checker/
-      Handler: app.lambda_handler
-      Runtime: python3.9
-      Architectures:
-        - x86_64
-
-  StockSellerFunction:
+  ProcessFileFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/stock_seller/
+      CodeUri: functions/process_file/
       Handler: app.lambda_handler
       Runtime: python3.9
       Architectures:
         - x86_64
 
-  StockBuyerFunction:
+  GetDataFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/stock_buyer/
+      CodeUri: functions/get_data/
       Handler: app.lambda_handler
       Runtime: python3.9
       Architectures:
         - x86_64
 
-  TransactionTable:
-    Type: AWS::Serverless::SimpleTable # More info about SimpleTable Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-simpletable.html
+  SendEmailFunction:
+    Type: AWS::Serverless::Function
     Properties:
-      PrimaryKey:
-        Name: Id
-        Type: String
-      ProvisionedThroughput:
-        ReadCapacityUnits: 1
-        WriteCapacityUnits: 1
+      CodeUri: functions/send_email/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+
+  # TransactionTable:
+    # Type: AWS::Serverless::SimpleTable
+    # Properties:
+      # PrimaryKey:
+        # Name: Id
+        # Type: String
+      # ProvisionedThroughput:
+        # ReadCapacityUnits: 1
+        # WriteCapacityUnits: 1
 
 Outputs:
-  # StockTradingStateMachineHourlyTradingSchedule is an implicit Schedule event rule created out of Events key under Serverless::StateMachine
-  # Find out more about other implicit resources you can reference within SAM
-  # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources.html
   StockTradingStateMachineArn:
     Description: "Stock Trading State machine ARN"
     Value: !Ref StockTradingStateMachine
