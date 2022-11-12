@@ -13,6 +13,13 @@ Globals:
     TracingEnabled: True
 
 Resources:
+  TransactionsBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+
   StoriFlowStateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
@@ -24,19 +31,31 @@ Resources:
         # DDBPutItem: !Sub arn:${AWS::Partition}:states:::dynamodb:putItem
         # DDBTable: !Ref TransactionTable
       Events:
-        HourlyTradingSchedule:
-          Type: Schedule
+        StateChange:
+          Type: EventBridgeRule
           Properties:
-            Description: Schedule to run the stock trading state machine every hour
-            Enabled: False
-            Schedule: "rate(1 hour)"
+            EventBusName: default
+            Pattern:
+              source:
+                - aws.s3
+              detail-type:
+                - Object Created
+              detail:
+                bucket:
+                  name:
+                    - !Ref TransactionsBucket
       Policies:
+        - RekognitionDetectOnlyPolicy: {}
+        - S3ReadPolicy:
+            BucketName: !Ref TransactionsBucket
         - LambdaInvokePolicy:
             FunctionName: !Ref ProcessFileFunction
         - LambdaInvokePolicy:
             FunctionName: !Ref GetDataFunction
         - LambdaInvokePolicy:
             FunctionName: !Ref SendEmailFunction
+        
+        
         # - DynamoDBWritePolicy:
             # TableName: !Ref TransactionTable
 
