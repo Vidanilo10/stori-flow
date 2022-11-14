@@ -18,7 +18,7 @@ class GetData:
 
     def get_file_object(self):
         return self.s3_client.get_object(
-            Bucket=os.getenv["BUCKET"],
+            Bucket=os.environ.get("BUCKET"),
             Key=self.file_name
         )
 
@@ -36,13 +36,13 @@ class GetData:
 
     def query_object(self):
         return self.dynamodb_client.get_item(
-            TableName=os.getenv['TABLE_NAME'],
+            TableName=os.environ.get('TABLE_NAME'),
             Key=self.account_id
         )
 
     def put_item(self):
         self.dynamodb_client.put_item(
-            TableName=os.getenv['TABLE_NAME'],
+            TableName=os.environ.get('TABLE_NAME'),
             Item={
                 "Id": self.account_id,
                 "Transactions": self.get_transactions()
@@ -51,7 +51,7 @@ class GetData:
 
     def update_item(self):
         self.dynamodb_client.update_item(
-            TableName=os.getenv['TABLE_NAME'],
+            TableName=os.environ.get('TABLE_NAME'),
             Key=self.account_id,
             AttributeUpdates={
                 "Transactions": self.get_transactions()

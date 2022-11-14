@@ -12,6 +12,10 @@ Globals:
     Policies:
     - DynamoDBCrudPolicy:
       TableName: !Ref AccountTable
+    Environment:
+      Variables:
+        TABLE_NAME: account-table
+        BUCKET: transactions-bucket
   Api:
     TracingEnabled: True
 
@@ -19,6 +23,7 @@ Resources:
   TransactionsBucket:
     Type: "AWS::S3::Bucket"
     Properties:
+      BucketName: transactions-bucket
       NotificationConfiguration:
         EventBridgeConfiguration:
           EventBridgeEnabled: true
@@ -86,6 +91,7 @@ Resources:
   AccountTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
+      TableName: account-table
       PrimaryKey:
         Name: Id
         Type: Number
