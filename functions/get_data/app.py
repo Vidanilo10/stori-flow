@@ -1,9 +1,12 @@
 import os
+import json
 
 import boto3
 
+
 def lambda_handler(event, context):
     get_data = GetData(event=event)
+
 
 class GetData:
     def __init__(self, event) -> None:
@@ -11,9 +14,9 @@ class GetData:
         self.s3_client = boto3.client("s3")
         self.account_id = event.get("file_name")
         self.file_name = event.get("file_name")
-        self.get_transactions = self.__get_transactions()
+        self.get_transactions = self.get_transactions()
 
-    def __get_transactions(self):
+    def get_transactions(self):
         response = self.s3_client.get_object(
             Bucket=os.getenv["BUCKET"],
             Key=self.file_name
@@ -31,24 +34,51 @@ class GetData:
         return transactions
 
     def query_object(self):
-        response = self.dynamodb_client.get_item(
+        return self.dynamodb_client.get_item(
             TableName=os.getenv['TABLE_NAME'],
             Key=self.account_id
         )
-        
-        if response:
-            self.dynamodb_client.update_item(
-                TableName=os.getenv['TABLE_NAME'],
-                Key=self.account_id,
-                AttributeUpdates={
-                    "Transactions": self.__get_transactions()
-                }
-            )
+
+    def put_item(self):
+        self.dynamodb_client.put_item(
+            TableName=os.getenv['TABLE_NAME'],
+            Item={
+                "Id": self.account_id,
+                "Transactions": self.get_transactions()
+            }
+        )
+
+    def update_item(self):
+        self.dynamodb_client.update_item(
+            TableName=os.getenv['TABLE_NAME'],
+            Key=self.account_id,
+            AttributeUpdates={
+                "Transactions": self.get_transactions()
+            }
+        )
+
+    def get_data(self):
+        if self.query_object():
+            self.update_item()
         else:
-            self.dynamodb_client.put_item(
-                TableName=os.getenv['TABLE_NAME'],
-                Item={
-                    "Id": self.account_id,
-                    "Transactions": self.__get_transactions()
-                }
-            )
+            self.put_item()
+
+    def handler(self):
+        try:
+            self.get_data()
+        except Exception as e:
+            api_exception_obj = {
+                "isBase64Encoded": False,
+                "StatusCode": 400,
+                "Payload": json.dumps({
+                    "error": {
+                        "message": str(e),
+                    }
+                })
+            }
+            return api_exception_obj
+        else:
+            return {
+                "account_id": self.account_id,
+                "file_name": self.file_name
+            }
