@@ -9,6 +9,9 @@ Globals:
   Function:
     Tracing: Active
     Timeout: 300
+    Policies:
+    - DynamoDBCrudPolicy:
+      TableName: !Ref AccountTable
   Api:
     TracingEnabled: True
 
@@ -28,8 +31,6 @@ Resources:
         ProcessDataFunctionArn: !GetAtt ProcessDataFunction.Arn
         GetDataFunctionArn: !GetAtt GetDataFunction.Arn
         SendEmailFunctionArn: !GetAtt SendEmailFunction.Arn
-        # DDBPutItem: !Sub arn:${AWS::Partition}:states:::dynamodb:putItem
-        # DDBTable: !Ref TransactionTable
       Events:
         StateChange:
           Type: EventBridgeRule
@@ -54,10 +55,6 @@ Resources:
             FunctionName: !Ref GetDataFunction
         - LambdaInvokePolicy:
             FunctionName: !Ref SendEmailFunction
-        
-        
-        # - DynamoDBWritePolicy:
-            # TableName: !Ref TransactionTable
 
   ProcessDataFunction:
     Type: AWS::Serverless::Function
@@ -86,15 +83,15 @@ Resources:
       Architectures:
         - x86_64
 
-  # TransactionTable:
-    # Type: AWS::Serverless::SimpleTable
-    # Properties:
-      # PrimaryKey:
-        # Name: Id
-        # Type: String
-      # ProvisionedThroughput:
-        # ReadCapacityUnits: 1
-        # WriteCapacityUnits: 1
+  AccountTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: Id
+        Type: Number
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
 
 Outputs:
   StoriFlowStateMachineArn:
