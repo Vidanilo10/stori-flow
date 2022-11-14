@@ -1,10 +1,10 @@
 {
     "Comment": "A state machine to stori flow",
-    "StartAt": "Check Stock Value",
+    "StartAt": "Get data",
     "States": {
-        "Check Stock Value": {
+        "Get data": {
             "Type": "Task",
-            "Resource": "${StockCheckerFunctionArn}",
+            "Resource": "${GetDataFunctionArn}",
             "Retry": [
                 {
                     "ErrorEquals": [
@@ -15,22 +15,11 @@
                     "BackoffRate": 1.5
                 }
             ],
-            "Next": "Buy or Sell?"
+            "Next": "Process data"
         },
-        "Buy or Sell?": {
-            "Type": "Choice",
-            "Choices": [
-                {
-                    "Variable": "$.stock_price",
-                    "NumericLessThanEquals": 50,
-                    "Next": "Buy Stock"
-                }
-            ],
-            "Default": "Sell Stock"
-        },
-        "Sell Stock": {
+        "Process data": {
             "Type": "Task",
-            "Resource": "${StockSellerFunctionArn}",
+            "Resource": "${ProcessDataFunctionArn}",
             "Retry": [
                 {
                     "ErrorEquals": [
@@ -41,11 +30,11 @@
                     "BackoffRate": 1
                 }
             ],
-            "Next": "Record Transaction"
+            "Next": "Send email"
         },
-        "Buy Stock": {
+        "Send email": {
             "Type": "Task",
-            "Resource": "${StockBuyerFunctionArn}",
+            "Resource": "${SendEmailFunctionArn}",
             "Retry": [
                 {
                     "ErrorEquals": [
@@ -54,41 +43,6 @@
                     "IntervalSeconds": 2,
                     "MaxAttempts": 3,
                     "BackoffRate": 1
-                }
-            ],
-            "Next": "Record Transaction"
-        },
-        "Record Transaction": {
-            "Type": "Task",
-            "Resource": "${DDBPutItem}",
-            "Parameters": {
-                "TableName": "${DDBTable}",
-                "Item": {
-                    "Id": {
-                        "S.$": "$.id"
-                    },
-                    "Type": {
-                        "S.$": "$.type"
-                    },
-                    "Price": {
-                        "N.$": "$.price"
-                    },
-                    "Quantity": {
-                        "N.$": "$.qty"
-                    },
-                    "Timestamp": {
-                        "S.$": "$.timestamp"
-                    }
-                }
-            },
-            "Retry": [
-                {
-                    "ErrorEquals": [
-                        "States.TaskFailed"
-                    ],
-                    "IntervalSeconds": 20,
-                    "MaxAttempts": 5,
-                    "BackoffRate": 10
                 }
             ],
             "End": true
