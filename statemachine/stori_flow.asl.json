@@ -1,5 +1,5 @@
 {
-    "Comment": "A state machine that does mock stock trading.",
+    "Comment": "A state machine to stori flow",
     "StartAt": "Check Stock Value",
     "States": {
         "Check Stock Value": {
