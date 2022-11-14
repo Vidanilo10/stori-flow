@@ -9,9 +9,6 @@ Globals:
   Function:
     Tracing: Active
     Timeout: 300
-    Policies:
-    - DynamoDBCrudPolicy:
-      TableName: !Ref AccountTable
     Environment:
       Variables:
         TABLE_NAME: account-table
@@ -69,6 +66,9 @@ Resources:
       Runtime: python3.9
       Architectures:
         - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+          TableName: !Ref AccountTable
 
   GetDataFunction:
     Type: AWS::Serverless::Function
@@ -78,6 +78,9 @@ Resources:
       Runtime: python3.9
       Architectures:
         - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+          TableName: !Ref AccountTable
 
   SendEmailFunction:
     Type: AWS::Serverless::Function
@@ -87,6 +90,9 @@ Resources:
       Runtime: python3.9
       Architectures:
         - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+          TableName: !Ref AccountTable
 
   AccountTable:
     Type: AWS::Serverless::SimpleTable
