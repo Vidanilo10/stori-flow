@@ -5,7 +5,7 @@ import boto3
 
 
 def lambda_handler(event, context):
-    get_data = GetData(event=event)
+    return GetData(event=event).handler()
 
 
 class GetData:
@@ -16,14 +16,15 @@ class GetData:
         self.file_name = event.get("file_name")
         self.get_transactions = self.get_transactions()
 
-    def get_transactions(self):
-        response = self.s3_client.get_object(
+    def get_file_object(self):
+        return self.s3_client.get_object(
             Bucket=os.getenv["BUCKET"],
             Key=self.file_name
         )
-        
+
+    def get_transactions(self):
         transactions = []
-        for i, line in enumerate(response['Body'].iter_lines()):
+        for i, line in enumerate(self.get_file_object()['Body'].iter_lines()):
             line.decode('utf-8')
             transactions.append({
                 "id": line[0],
