@@ -97,9 +97,9 @@ Resources:
         # WriteCapacityUnits: 1
 
 Outputs:
-  StockTradingStateMachineArn:
-    Description: "Stock Trading State machine ARN"
-    Value: !Ref StockTradingStateMachine
-  StockTradingStateMachineRoleArn:
-    Description: "IAM Role created for Stock Trading State machine based on the specified SAM Policy Templates"
-    Value: !GetAtt StockTradingStateMachineRole.Arn
+  StoriFlowStateMachineArn:
+    Description: "Stori Flow State machine ARN"
+    Value: !Ref StoriFlowStateMachine
+  StoriFlowStateMachineRoleArn:
+    Description: "IAM Role created for Stori Flow State machine based on the specified SAM Policy Templates"
+    Value: !GetAtt StoriFlowStateMachineRole.Arn
