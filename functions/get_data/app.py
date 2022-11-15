@@ -12,8 +12,8 @@ class GetData:
     def __init__(self, event) -> None:
         self.dynamodb_client = boto3.client("dynamodb")
         self.s3_client = boto3.client("s3")
-        self.account_id = event.get("file_name")
-        self.file_name = event.get("file_name")
+        self.account_id = event.get("detail").get("object").get("key").split(".")[0]
+        self.file_name = event.get("detail").get("object").get("key")
         self.get_transactions = self.get_transactions()
 
     def get_file_object(self):
