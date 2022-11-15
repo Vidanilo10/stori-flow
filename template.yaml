@@ -12,15 +12,15 @@ Globals:
     Environment:
       Variables:
         TABLE_NAME: account-table
-        BUCKET: transactions-bucket
+        BUCKET: stori-flow
   Api:
     TracingEnabled: True
 
 Resources:
-  TransactionsBucket:
+  StoriBucketFlow:
     Type: "AWS::S3::Bucket"
     Properties:
-      BucketName: transactions-bucket
+      BucketName: stori-flow
       NotificationConfiguration:
         EventBridgeConfiguration:
           EventBridgeEnabled: true
@@ -46,11 +46,11 @@ Resources:
               detail:
                 bucket:
                   name:
-                    - !Ref TransactionsBucket
+                    - !Ref StoriBucketFlow
       Policies:
         - RekognitionDetectOnlyPolicy: {}
         - S3ReadPolicy:
-            BucketName: !Ref TransactionsBucket
+            BucketName: !Ref StoriBucketFlow
         - LambdaInvokePolicy:
             FunctionName: !Ref ProcessDataFunction
         - LambdaInvokePolicy:
@@ -66,9 +66,9 @@ Resources:
       Runtime: python3.9
       Architectures:
         - x86_64
-      Policies:
-        - DynamoDBCrudPolicy:
-          TableName: !Ref AccountTable
+    Policies:
+      - DynamoDBCrudPolicy:
+        TableName: !Ref AccountTable
 
   GetDataFunction:
     Type: AWS::Serverless::Function
@@ -78,9 +78,9 @@ Resources:
       Runtime: python3.9
       Architectures:
         - x86_64
-      Policies:
-        - DynamoDBCrudPolicy:
-          TableName: !Ref AccountTable
+    Policies:
+      - DynamoDBCrudPolicy:
+        TableName: !Ref AccountTable
 
   SendEmailFunction:
     Type: AWS::Serverless::Function
@@ -90,8 +90,8 @@ Resources:
       Runtime: python3.9
       Architectures:
         - x86_64
-      Policies:
-        - DynamoDBCrudPolicy:
+    Policies:
+      - DynamoDBCrudPolicy:
           TableName: !Ref AccountTable
 
   AccountTable:
