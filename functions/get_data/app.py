@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import json
 
@@ -25,7 +26,7 @@ class GetData:
         )
         self.account_id = event.get("detail").get("object").get("key").split("_")[0]
         self.file_name = event.get("detail").get("object").get("key")
-        self.user_email = str(event.get("detail").get("object").get("key").split("_")[1])
+        self.user_email = str(event.get("detail").get("object").get("key").split("_")[1]).replace(".csv", "")
         self.transactions = self.get_transactions()
 
     def get_file_object(self):
@@ -39,7 +40,13 @@ class GetData:
         lines = self.get_file_object()['Body'].read().decode("utf-8").split('\n')
         for line in lines[1:]:
             i = line.split(", ")
-            transactions.append({"id": i[0], "date": i[1], "transaction": i[2].replace("\r", "")})
+            transactions.append(
+                {
+                    "id": int(i[0]),
+                    "date": datetime.strptime(f"22/{i[1]}", '%y/%m/%d'),
+                    "transaction": float(i[2].replace("\r", ""))
+                }
+            )
         return transactions
 
     def get_data(self):
