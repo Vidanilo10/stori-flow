@@ -22,8 +22,9 @@ class GetData:
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID_USER"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY_USER")
         )
-        self.account_id = int(event.get("detail").get("object").get("key").split(".")[0])
+        self.account_id = event.get("detail").get("object").get("key").split("_")[0]
         self.file_name = event.get("detail").get("object").get("key")
+        self.user_email = str(event.get("detail").get("object").get("key").split("_")[1])
         self.get_transactions = self.get_transactions()
 
     def get_file_object(self):
@@ -47,7 +48,11 @@ class GetData:
     def query_object(self):
         return self.dynamodb_client.get_item(
             TableName=os.environ.get('TABLE_NAME'),
-            Key=self.account_id
+            Key={
+                'Id': {
+                    'N': self.account_id
+                }
+            }
         )
 
     def put_item(self):
@@ -55,7 +60,8 @@ class GetData:
             TableName=os.environ.get('TABLE_NAME'),
             Item={
                 "Id": self.account_id,
-                "Transactions": self.get_transactions()
+                "Transactions": self.get_transactions,
+                "Email": self.user_email
             }
         )
 
@@ -64,7 +70,8 @@ class GetData:
             TableName=os.environ.get('TABLE_NAME'),
             Key=self.account_id,
             AttributeUpdates={
-                "Transactions": self.get_transactions()
+                "Transactions": self.get_transactions,
+                "Email": self.user_email
             }
         )
 
@@ -91,5 +98,6 @@ class GetData:
         else:
             return {
                 "account_id": self.account_id,
-                "file_name": self.file_name
+                "file_name": self.file_name,
+                "email": self.user_email
             }
