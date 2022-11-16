@@ -37,13 +37,9 @@ class GetData:
     def get_transactions(self):
         transactions = []
         lines = self.get_file_object()['Body'].read().decode("utf-8").split('\n')
-        for line in lines:
-            line.split(", ")
-            transactions.append({
-                "id": line[0],
-                "Date": str(line[1]),
-                "Transaction": line[2]
-            })
+        for line in lines[1:]:
+            i = line.split(", ")
+            transactions.append({"id": i[0], "date": i[1], "transaction": i[2].replace("\r", "")})
         return transactions
 
     def get_data(self):
