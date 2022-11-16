@@ -10,8 +10,18 @@ def lambda_handler(event, context):
 
 class GetData:
     def __init__(self, event) -> None:
-        self.dynamodb_client = boto3.client("dynamodb")
-        self.s3_client = boto3.client("s3")
+        self.dynamodb_client = boto3.client(
+            service_name="dynamodb",
+            region_name=os.getenv("AWS_REGION"),
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID_USER"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY_USER")
+        )
+        self.s3_client = boto3.client(
+            service_name="s3",
+            region_name=os.getenv("AWS_REGION"),
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID_USER"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY_USER")
+        )
         self.account_id = event.get("detail").get("object").get("key").split(".")[0]
         self.file_name = event.get("detail").get("object").get("key")
         self.get_transactions = self.get_transactions()

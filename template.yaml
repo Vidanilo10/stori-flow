@@ -13,8 +13,25 @@ Globals:
       Variables:
         TABLE_NAME: account-table
         BUCKET: stori-flow
+        AWS_ACCESS_KEY_ID_USER:
+          Ref: AwsAccessKeyId
+        AWS_SECRET_ACCESS_KEY_USER:
+          Ref: AwsSecretAccessKey
+        REGION:
+          Ref: AwsRegion
   Api:
     TracingEnabled: True
+
+Parameters:
+  AwsAccessKeyId:
+    Type: String
+    Description: Aws access key id
+  AwsSecretAccessKey:
+    Type: String
+    Description: Aws secret access key
+  AwsRegion:
+    Type: String
+    Description: Region
 
 Resources:
   StoriBucketFlow:
@@ -69,6 +86,9 @@ Resources:
     Policies:
       - DynamoDBCrudPolicy:
         TableName: !Ref AccountTable
+      - S3CrudPolicy:
+          BucketName:
+            Ref: stori-flow
 
   GetDataFunction:
     Type: AWS::Serverless::Function
@@ -81,6 +101,9 @@ Resources:
     Policies:
       - DynamoDBCrudPolicy:
         TableName: !Ref AccountTable
+      - S3CrudPolicy:
+          BucketName:
+            Ref: stori-flow
 
   SendEmailFunction:
     Type: AWS::Serverless::Function
@@ -92,7 +115,10 @@ Resources:
         - x86_64
     Policies:
       - DynamoDBCrudPolicy:
-          TableName: !Ref AccountTable
+        TableName: !Ref AccountTable
+      - S3CrudPolicy:
+          BucketName:
+            Ref: stori-flow
 
   AccountTable:
     Type: AWS::Serverless::SimpleTable
