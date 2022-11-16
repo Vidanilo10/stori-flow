@@ -10,12 +10,13 @@ def lambda_handler(event, context):
 
 class GetData:
     def __init__(self, event) -> None:
-        self.dynamodb_client = boto3.client(
+        self.dynamodb_table = boto3.resource(
             service_name="dynamodb",
             region_name=os.getenv("AWS_REGION"),
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID_USER"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY_USER")
-        )
+        ).Table('account-table')
+
         self.s3_client = boto3.client(
             service_name="s3",
             region_name=os.getenv("AWS_REGION"),
@@ -25,7 +26,7 @@ class GetData:
         self.account_id = event.get("detail").get("object").get("key").split("_")[0]
         self.file_name = event.get("detail").get("object").get("key")
         self.user_email = str(event.get("detail").get("object").get("key").split("_")[1])
-        self.get_transactions = self.get_transactions()
+        self.transactions = self.get_transactions()
 
     def get_file_object(self):
         return self.s3_client.get_object(
@@ -35,51 +36,26 @@ class GetData:
 
     def get_transactions(self):
         transactions = []
-        for i, line in enumerate(self.get_file_object()['Body'].iter_lines()):
-            line.decode('utf-8')
+        lines = self.get_file_object()['Body'].read().decode("utf-8").split('\n')
+        for line in lines:
+            line.split(", ")
             transactions.append({
                 "id": line[0],
-                "Date": line[1],
+                "Date": str(line[1]),
                 "Transaction": line[2]
             })
-
         return transactions
 
-    def query_object(self):
-        return self.dynamodb_client.get_item(
-            TableName=os.environ.get('TABLE_NAME'),
-            Key={
-                'Id': {
-                    'N': self.account_id
-                }
-            }
-        )
-
-    def put_item(self):
-        self.dynamodb_client.put_item(
-            TableName=os.environ.get('TABLE_NAME'),
-            Item={
-                "Id": self.account_id,
-                "Transactions": self.get_transactions,
-                "Email": self.user_email
-            }
-        )
-
-    def update_item(self):
-        self.dynamodb_client.update_item(
-            TableName=os.environ.get('TABLE_NAME'),
-            Key=self.account_id,
-            AttributeUpdates={
-                "Transactions": self.get_transactions,
-                "Email": self.user_email
-            }
-        )
-
     def get_data(self):
-        if self.query_object():
-            self.update_item()
-        else:
-            self.put_item()
+        self.dynamodb_table.update_item(
+            Key={
+                "Id": int(self.account_id)
+            },
+            UpdateExpression="set #e=:e, #t=:t",
+            ExpressionAttributeValues={":e": self.user_email, ":t": self.transactions},
+            ExpressionAttributeNames={"#e": "Email", "#t": "Transactions"},
+            ReturnValues="UPDATED_NEW",
+        )
 
     def handler(self):
         try:
