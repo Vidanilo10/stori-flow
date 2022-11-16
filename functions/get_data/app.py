@@ -22,7 +22,7 @@ class GetData:
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID_USER"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY_USER")
         )
-        self.account_id = event.get("detail").get("object").get("key").split(".")[0]
+        self.account_id = int(event.get("detail").get("object").get("key").split(".")[0])
         self.file_name = event.get("detail").get("object").get("key")
         self.get_transactions = self.get_transactions()
 
