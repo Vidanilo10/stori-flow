@@ -75,5 +75,6 @@ class ProcessData:
             return {
                 "account_id": self.account_id,
                 "email": self.user_email,
+                "file_name": self.file_name,
                 "data": data
             }
