@@ -9,7 +9,7 @@ This project contains source code and supporting files for a serverless applicat
 
 This application creates a workflow which starts with update action of a CSV file into a S3 bucket. The CSV contains information about the debit and credit transaction of a specific account.
 
-![stori flow](stoi-flow.png)
+![stori-flow](https://user-images.githubusercontent.com/82169162/202521281-6f8204cd-d773-4abb-8867-41e0ddc57ffd.png)
 
 The application uses several AWS resources, including Step Functions state machines, Lambda functions, an EventBridge rule trigger, and Dynamodb table. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
 
