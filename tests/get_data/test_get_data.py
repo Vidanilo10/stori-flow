@@ -4,9 +4,10 @@ import pytest
 from dotenv import load_dotenv
 import boto3
 
-load_dotenv()
 
 from functions.get_data.app import GetData
+
+load_dotenv()
 
 
 @pytest.fixture()
@@ -51,8 +52,31 @@ def start_boto3_client():
     )
 
 
+@pytest.fixture
+def upload_file(start_boto3_client):
+    try:
+        start_boto3_client.put_object(
+            'tests/get_data/10_vidanilo10@gmail.com.csv',
+            os.getenv("BUCKET"),
+            '10_vidanilo10@gmail.com.csv'
+        )
+    except Exception as e:
+        raise e
+
+
 @pytest.fixture()
 def starting_get_data(get_event_body):
     get_data = GetData(event=get_event_body)
     return get_data
 
+
+def test_get_file_object(starting_get_data):
+    assert starting_get_data.get_file_object()
+
+
+def test_get_transactions(starting_get_data):
+    assert starting_get_data.get_transactions()
+
+
+def test_get_data(starting_get_data):
+    assert starting_get_data.get_data()
