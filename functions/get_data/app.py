@@ -42,9 +42,9 @@ class GetData:
             i = line.split(", ")
             transactions.append(
                 {
-                    "id": int(i[0]),
-                    "date": datetime.strptime(f"22/{i[1]}", '%y/%m/%d'),
-                    "transaction": float(i[2].replace("\r", ""))
+                    "id": i[0],
+                    "date": i[1],
+                    "transaction": i[2].replace("\r", "")
                 }
             )
         return transactions
