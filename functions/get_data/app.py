@@ -64,16 +64,7 @@ class GetData:
         try:
             self.get_data()
         except Exception as e:
-            api_exception_obj = {
-                "isBase64Encoded": False,
-                "StatusCode": 400,
-                "Payload": json.dumps({
-                    "error": {
-                        "message": str(e),
-                    }
-                })
-            }
-            return api_exception_obj
+            raise e
         else:
             return {
                 "account_id": self.account_id,
