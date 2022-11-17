@@ -81,6 +81,7 @@ Resources:
       CodeUri: functions/process_data/
       Handler: app.lambda_handler
       Runtime: python3.9
+      MemorySize: 8192
       Architectures:
         - x86_64
     Policies:
@@ -96,6 +97,7 @@ Resources:
       CodeUri: functions/get_data/
       Handler: app.lambda_handler
       Runtime: python3.9
+      MemorySize: 8192
       Architectures:
         - x86_64
     Policies:
