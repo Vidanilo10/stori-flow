@@ -51,7 +51,7 @@ class SendEmail:
                     <p>
                         Thanks a lot dear user. 
                     </p>
-                    <img src="https://www.storicard.com/_next/static/media/complete-logo.9a85efb3.svg" alt="stori_image"> 
+                    <img src="https://blog.storicard.com/wp-content/uploads/2019/07/Stori-horizontal-11.jpg" alt="stori_image"> 
                 </body>
             </html>
         """
