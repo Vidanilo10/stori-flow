@@ -24,7 +24,7 @@ class GetData:
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID_USER"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY_USER")
         )
-        self.account_id = event.get("detail").get("object").get("key").split("_")[0]
+        self.account_id = int(event.get("detail").get("object").get("key").split("_")[0])
         self.file_name = event.get("detail").get("object").get("key")
         self.user_email = str(event.get("detail").get("object").get("key").split("_")[1]).replace(".csv", "")
         self.transactions = self.get_transactions()
@@ -52,7 +52,7 @@ class GetData:
     def get_data(self):
         self.dynamodb_table.update_item(
             Key={
-                "Id": int(self.account_id)
+                "Id": self.account_id
             },
             UpdateExpression="set #e=:e, #t=:t",
             ExpressionAttributeValues={":e": self.user_email, ":t": self.transactions},
