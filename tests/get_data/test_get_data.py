@@ -43,7 +43,7 @@ def get_event_body():
 
 
 @pytest.fixture()
-def start_boto3_client():
+def start_s3_client():
     return boto3.client(
         service_name="s3",
         region_name=os.getenv("REGION"),
@@ -52,10 +52,41 @@ def start_boto3_client():
     )
 
 
+@pytest.fixture()
+def start_dynamodb_resource():
+    return boto3.resource(
+        service_name="dynamodb",
+        region_name=os.getenv("REGION"),
+        AWS_ACCESS_KEY_ID_USER=os.getenv("ACCESS_KEY"),
+        AWS_SECRET_ACCESS_KEY_USER=os.getenv("SECRET_KEY")
+    )
+
+
 @pytest.fixture
-def upload_file(start_boto3_client):
+def create_test_table(start_dynamodb_resource):
+    start_dynamodb_resource.create_table(
+        TableName=os.getenv("TABLE_NAME"),
+        KeySchema=[
+            {
+                'AttributeName': 'Id',
+                'KeyType': 'N'
+            }
+        ]
+    )
+
+
+@pytest.fixture
+def create_test_bucket(start_s3_client):
+    start_s3_client.create_bucket(
+        Bucket=os.getenv("BUCKET")
+    )
+
+
+
+@pytest.fixture
+def upload_file(start_s3_client):
     try:
-        start_boto3_client.put_object(
+        start_s3_client.put_object(
             'tests/get_data/10_vidanilo10@gmail.com.csv',
             os.getenv("BUCKET"),
             '10_vidanilo10@gmail.com.csv'
@@ -79,4 +110,11 @@ def test_get_transactions(starting_get_data):
 
 
 def test_get_data(starting_get_data):
-    assert starting_get_data.get_data()
+    start = starting_get_data()
+    start.self.dynamodb_table=boto3.resource(
+        service_name="dynamodb",
+        region_name=os.getenv("AWS_REGION"),
+        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID_USER"),
+        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY_USER")
+    ).Table(os.getenv("TABLE_NAME"))
+    assert start.get_data()
