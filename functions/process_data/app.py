@@ -1,5 +1,5 @@
+import calendar
 import os
-import json
 
 import pandas as pd
 import boto3
@@ -55,7 +55,8 @@ class ProcessData:
 
     @staticmethod
     def get_transactions_by_month(df):
-        return df.groupby(df.date.dt.month)['id']
+        group = df.groupby(df.date.dt.month)['date']
+        return [{calendar.month_name[k]: len(v)} for k, v in group.groups.items()]
 
     @staticmethod
     def get_average_debit_amount(df):
