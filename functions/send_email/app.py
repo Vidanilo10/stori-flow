@@ -36,8 +36,7 @@ class SendEmail:
                     <p>
                         Hello, dear user, we have excellent news for you. There is your transactions
                         report with the resume and the necessary values to analyze your activity over owr
-                        application. Please take your time to analyze the information. If you have doubts
-                        feel free to contact our support team 
+                        application. 
                     </p>
                     <br>
                     <h2 style='text-align:center'> Data </h2>
@@ -46,12 +45,18 @@ class SendEmail:
                     <h4>Average debit amount: {self.data.get("average_debit_amount")}</h4>
                     <h4>Average credit amount: {self.data.get("average_credit_amount")}</h4>
                     <h4>Data by months: </h4>
-                    <p>{self.get_months_data()}</p>
+                    <h4>{self.get_months_data()}</h4>
                     <br>
                     <p>
-                        Thanks a lot dear user. 
+                        Thanks a lot dear user, This is the stori communications team. 
                     </p>
-                    <img src="https://blog.storicard.com/wp-content/uploads/2019/07/Stori-horizontal-11.jpg" alt="stori_image"> 
+                    <p>
+                        Please take your time to analyze the information. If you have doubts feel free 
+                        to contact our support team.
+                    </p>
+                    <div style="text-align: left;">
+                        <img src="https://blog.storicard.com/wp-content/uploads/2019/07/Stori-horizontal-11.jpg" alt="stori_image", width="600"> 
+                    </div>
                 </body>
             </html>
         """
