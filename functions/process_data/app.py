@@ -27,10 +27,11 @@ class ProcessData:
                 "Id": int(self.account_id)
             }
         )
-        return resp.get("Item")
+        return resp.get("Item").get("Transactions")
 
     def get_data_frame(self):
-        return pd.DataFrame(self.get_item())
+        df = pd.DataFrame(self.get_item())
+        return df
 
     def update_data_frame(self):
         df = self.get_data_frame()
@@ -41,7 +42,6 @@ class ProcessData:
 
     def get_data(self):
         df = self.update_data_frame()
-        print(f"Updated data frame dtypes: {df.dtypes}")
         return {
             "total_balance": self.get_total_balance(df=df),
             "transactions_by_month": self.get_transactions_by_month(df=df),
@@ -51,22 +51,18 @@ class ProcessData:
 
     @staticmethod
     def get_total_balance(df):
-        print(f"Transaction sum: {df['transaction'].sum()}")
         return df['transaction'].sum()
 
     @staticmethod
     def get_transactions_by_month(df):
-        print(f"group by: {df.groupby(df.date.dt.month)['id']}")
         return df.groupby(df.date.dt.month)['id']
 
     @staticmethod
     def get_average_debit_amount(df):
-        print(f"Average debit: {df[df['transaction'] < 0]['transaction'].mean()}")
         return df[df['transaction'] < 0]['transaction'].mean()
 
     @staticmethod
     def get_average_credit_amount(df):
-        print(f"Average credit: {df[df['transaction'] > 0]['transaction'].mean()}")
         return df[df['transaction'] > 0]['transaction'].mean()
 
     def handler(self):
