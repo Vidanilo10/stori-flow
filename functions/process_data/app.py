@@ -37,38 +37,33 @@ class ProcessData:
         df = pd.DataFrame(self.get_item())
         return df
 
-    def update_data_frame(self):
+    def update_data_frame(self) -> None:
         df = self.get_data_frame()
         df['date'] = pd.to_datetime(df['date'], format='%m/%d')
         df['id'] = df['id'].astype(int)
         df['transaction'] = df['transaction'].astype(float)
-        return df
+        self.df = df
 
     def get_data(self):
-        df = self.update_data_frame()
         return {
-            "total_balance": self.get_total_balance(df=df),
-            "transactions_by_month": self.get_transactions_by_month(df=df),
-            "average_debit_amount": self.get_average_debit_amount(df=df),
-            "average_credit_amount": self.get_average_credit_amount(df=df)
+            "total_balance": self.get_total_balance(),
+            "transactions_by_month": self.get_transactions_by_month(),
+            "average_debit_amount": self.get_average_debit_amount(),
+            "average_credit_amount": self.get_average_credit_amount()
         }
 
-    @staticmethod
-    def get_total_balance(df):
-        return df['transaction'].sum()
+    def get_total_balance(self):
+        return self.df['transaction'].sum()
 
-    @staticmethod
-    def get_transactions_by_month(df):
-        group = df.groupby(df.date.dt.month)['date']
+    def get_transactions_by_month(self):
+        group = self.df.groupby(df.date.dt.month)['date']
         return [{calendar.month_name[k]: len(v)} for k, v in group.groups.items()]
 
-    @staticmethod
-    def get_average_debit_amount(df):
-        return df[df['transaction'] < 0]['transaction'].mean()
+    def get_average_debit_amount(self):
+        return self.df[self.df['transaction'] < 0]['transaction'].mean()
 
-    @staticmethod
-    def get_average_credit_amount(df):
-        return df[df['transaction'] > 0]['transaction'].mean()
+    def get_average_credit_amount(self):
+        return self.df[self.df['transaction'] > 0]['transaction'].mean()
 
     def handler(self):
         try:
