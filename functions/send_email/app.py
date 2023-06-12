@@ -12,7 +12,11 @@ class SendEmail:
         self.user_email = event.get("email")
         self.file_name = event.get("file_name")
         self.data = event.get("data")
-        self.ses_client = boto3.client(
+        self.ses_client = start_ses_client()
+
+    @staticmethod
+    def start_ses_client():
+        return boto3.client(
             service_name="ses",
             region_name=os.getenv("AWS_REGION"),
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID_USER"),
