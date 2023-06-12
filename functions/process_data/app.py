@@ -14,7 +14,11 @@ class ProcessData:
         self.account_id = event.get("account_id")
         self.file_name = event.get("file_name")
         self.user_email = event.get("email")
-        self.dynamodb_table = boto3.resource(
+        self.dynamodb_table = self.get_dynamodb_table()
+
+    @staticmethod
+    def get_dynamodb_table():
+        return boto3.resource(
             service_name="dynamodb",
             region_name=os.getenv("AWS_REGION"),
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID_USER"),
