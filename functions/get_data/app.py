@@ -48,7 +48,6 @@ class GetData:
     def get_user_email(event):
         return str(event.get("detail").get("object").get("key").split("_")[1]).replace(".csv", "")
 
-
     def get_file_object(self):
         return self.s3_client.get_object(
             Bucket=os.environ.get("BUCKET"),
