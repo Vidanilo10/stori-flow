@@ -11,23 +11,43 @@ def lambda_handler(event, context):
 
 class GetData:
     def __init__(self, event) -> None:
-        self.dynamodb_table = boto3.resource(
+        self.dynamodb_table = self.start_dynamodb_table()
+        self.s3_client = self.start_s3_client()
+        self.account_id = self.get_account_id(event=event)
+        self.file_name = self.get_file_name(event=event)
+        self.user_email = self.get_user_email(event=event)
+        self.transactions = self.get_transactions()
+
+    @staticmethod
+    def start_dynamodb_table():
+        return boto3.resource(
             service_name="dynamodb",
             region_name=os.getenv("AWS_REGION"),
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID_USER"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY_USER")
         ).Table('account-table')
 
-        self.s3_client = boto3.client(
+    @staticmethod
+    def start_s3_client():
+        return boto3.client(
             service_name="s3",
             region_name=os.getenv("AWS_REGION"),
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID_USER"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY_USER")
         )
-        self.account_id = int(event.get("detail").get("object").get("key").split("_")[0])
-        self.file_name = event.get("detail").get("object").get("key")
-        self.user_email = str(event.get("detail").get("object").get("key").split("_")[1]).replace(".csv", "")
-        self.transactions = self.get_transactions()
+
+    @staticmethod
+    def get_account_id(event):
+        return int(event.get("detail").get("object").get("key").split("_")[0])
+
+    @staticmethod
+    def get_file_name(event):
+        return event.get("detail").get("object").get("key")
+
+    @staticmethod
+    def get_user_email(event):
+        return str(event.get("detail").get("object").get("key").split("_")[1]).replace(".csv", "")
+
 
     def get_file_object(self):
         return self.s3_client.get_object(
